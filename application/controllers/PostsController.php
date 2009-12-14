@@ -52,18 +52,22 @@ class PostsController extends Zend_Controller_Action
 	{
 		// action body
 		if(!Zend_Auth::getInstance()->hasIdentity()) {
-			//$this->_redirect('index/login');
+			$this->_redirect('index/index');
 		}
-		$request = $this->getRequest();
-		$postForm = new Form_Post();
-		if ($this->getRequest()->isPost()) {
-			if ($postForm->isValid($request->getPost())) {
-				$model = new Model_DbTable_Posts();
-				$model->savePost($postForm->getValues());
-				$this->_redirect('index/index');
-			}
-		}
-		$this->view->postForm = $postForm;
+                $acl = new Model_Acl();
+		$identity = Zend_Auth::getInstance()->getIdentity();
+                if( $acl->isAllowed( $identity['Role'] ,'posts','add') ) {
+                    $request = $this->getRequest();
+                    $postForm = new Form_Post();
+                    if ($this->getRequest()->isPost()) {
+                            if ($postForm->isValid($request->getPost())) {
+                                    $model = new Model_DbTable_Posts();
+                                    $model->savePost($postForm->getValues());
+                                    $this->_redirect('index/index');
+                            }
+                    }
+                    $this->view->postForm = $postForm;
+                }
 	}
 
 	public function editAction()
